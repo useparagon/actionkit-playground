@@ -1,9 +1,7 @@
-import NextAuth from "next-auth";
+import { authkitMiddleware } from '@workos-inc/authkit-nextjs';
 
-import { authConfig } from "@/app/(auth)/auth.config";
+export default authkitMiddleware();
 
-export default NextAuth(authConfig).auth;
-
-export const config = {
-  matcher: ["/", "/:id", "/api/:path*", "/login", "/register"],
-};
+// Match against pages that require auth
+// Leave this out if you want auth on every resource (including images, css etc.)
+export const config = { matcher: ['/:all*', '/api/:all*'] };

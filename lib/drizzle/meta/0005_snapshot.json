@@ -1,8 +1,8 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "73e047b1-fafe-4faf-b9e5-9878f5087fba",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "7e5fa09f-6515-456b-8328-85c33d9c1d59",
+  "prevId": "59cb62d2-eb93-4aa8-afe1-6257dbf15a2b",
   "tables": {
     "Chat": {
       "name": "Chat",
@@ -23,13 +23,41 @@
         },
         "messages": {
           "name": "messages",
-          "type": "blob",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
         "userId": {
           "name": "userId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "systemPrompt": {
+          "name": "systemPrompt",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "tools": {
+          "name": "tools",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "modelName": {
+          "name": "modelName",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "modelProvider": {
+          "name": "modelProvider",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
@@ -74,6 +102,13 @@
         },
         "password": {
           "name": "password",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "externalId": {
+          "name": "externalId",
           "type": "text",
           "primaryKey": false,
           "notNull": false,

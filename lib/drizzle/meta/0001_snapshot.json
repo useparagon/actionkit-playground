@@ -1,8 +1,8 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "73e047b1-fafe-4faf-b9e5-9878f5087fba",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "6ff61d1d-8243-45b8-acc4-0975ea7da5ab",
+  "prevId": "73e047b1-fafe-4faf-b9e5-9878f5087fba",
   "tables": {
     "Chat": {
       "name": "Chat",
@@ -74,6 +74,13 @@
         },
         "password": {
           "name": "password",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "externalId": {
+          "name": "externalId",
           "type": "text",
           "primaryKey": false,
           "notNull": false,

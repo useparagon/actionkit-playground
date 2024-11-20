@@ -27,6 +27,7 @@ yarn-error.log*
 .env.local
 .env.development.local
 .env.test.local
+.env.production
 .env.production.local
 
 # turbo
@@ -36,3 +37,12 @@ yarn-error.log*
 .vercel
 .vscode
 .env*.local
+.worker-next
+.open-next
+.wrangler
+.dev.vars
+# Sentry Config File
+.env.sentry-build-plugin
+
+# local db
+db.sqlite

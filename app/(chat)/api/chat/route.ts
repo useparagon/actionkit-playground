@@ -1,65 +1,169 @@
-import { convertToCoreMessages, Message, streamText } from "ai";
+import { createAISDKTools } from "@agentic/ai-sdk";
+import { FirecrawlClient } from "@agentic/firecrawl";
+import {
+  convertToCoreMessages,
+  CoreTool,
+  createDataStreamResponse,
+  jsonSchema,
+  Message,
+  streamText,
+  tool as aiTool,
+  NoSuchToolError,
+  InvalidToolArgumentsError,
+  ToolExecutionError,
+  DataStreamWriter,
+} from "ai";
+import type { JSONSchema7 } from "json-schema";
 import { z } from "zod";
 
 import { customModel } from "@/ai";
-import { auth } from "@/app/(auth)/auth";
+import { auth, ExtendedSession, userWithToken } from "@/app/(auth)/auth";
 import { deleteChatById, getChatById, saveChat } from "@/db/queries";
 
-export async function POST(request: Request) {
-  const { id, messages }: { id: string; messages: Array<Message> } =
-    await request.json();
+import { ActionInput, ParagraphTypes } from "@/lib/paragon/useParagon";
+import { setTimeout } from "timers/promises";
 
-  const session = await auth();
+export type FunctionTool = {
+  type: "function";
+  function: { name: string; description: string; parameters: JSONSchema7 };
+};
+
+export async function POST(request: Request) {
+  let firecrawl: FirecrawlClient | undefined;
+  if (process.env.FIRECRAWL_API_KEY) {
+    firecrawl = new FirecrawlClient();
+  }
+
+  const {
+    id,
+    messages,
+    systemPrompt,
+    tools,
+    actions,
+    modelName = "gpt-4o",
+    modelProvider = "openai",
+  }: {
+    id: string;
+    messages: Array<Message>;
+    systemPrompt: string;
+    tools: ParagraphTypes[string];
+    actions: FunctionTool[];
+    modelProvider: string;
+    modelName: string;
+  } = await request.json();
+
+  const session = await userWithToken();
 
   if (!session) {
     return new Response("Unauthorized", { status: 401 });
   }
 
   const coreMessages = convertToCoreMessages(messages);
-
-  const result = await streamText({
-    model: customModel,
-    system:
-      "you are a friendly assistant! keep your responses concise and helpful.",
-    messages: coreMessages,
-    maxSteps: 5,
-    tools: {
-      getWeather: {
-        description: "Get the current weather at a location",
-        parameters: z.object({
-          latitude: z.number(),
-          longitude: z.number(),
-        }),
-        execute: async ({ latitude, longitude }) => {
-          const response = await fetch(
-            `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m&hourly=temperature_2m&daily=sunrise,sunset&timezone=auto`,
-          );
-
-          const weatherData = await response.json();
-          return weatherData;
+  return createDataStreamResponse({
+    execute(dataStream: DataStreamWriter) {
+      const result = streamText({
+        model: customModel({}),
+        system: systemPrompt,
+        messages: coreMessages,
+        maxSteps: 5,
+        tools: {
+          ...(firecrawl ? createAISDKTools(firecrawl) : {}),
+          ...Object.fromEntries(
+            actions.map((tool) => {
+              return [
+                tool.function.name,
+                aiTool({
+                  description: tool.function.description,
+                  parameters: jsonSchema(tool.function.parameters),
+                  execute: async (params: any, { toolCallId }) => {
+                    dataStream.writeMessageAnnotation({
+                      type: "tool-call-input",
+                      toolCallId,
+                      params,
+                    });
+                    try {
+                      const r = await fetch(
+                        `https://actionkit.useparagon.com/projects/${process.env.NEXT_PUBLIC_PARAGON_PROJECT_ID}/actions`,
+                        {
+                          method: "POST",
+                          body: JSON.stringify({
+                            action: tool.function.name,
+                            parameters: params,
+                          }),
+                          headers: {
+                            Authorization: `Bearer ${session.paragonUserToken}`,
+                            "Content-Type": "application/json",
+                          },
+                          signal: AbortSignal.timeout(10000),
+                        }
+                      );
+                      const output = await r.json();
+                      if (!r.ok) {
+                        throw new Error(JSON.stringify(output, null, 2));
+                      }
+                      return output;
+                    } catch (err) {
+                      if (err instanceof Error) {
+                        if (err.name === "AbortError") {
+                          return {
+                            error: {
+                              message: "Function timed out after 10s.",
+                            },
+                          };
+                        }
+                        return {
+                          error: {
+                            message: err.message,
+                          },
+                        };
+                      }
+                      return err;
+                    }
+                  },
+                }),
+              ];
+            })
+          ),
         },
-      },
+        onFinish: async ({ response: { messages: responseMessages } }) => {
+          if (session.user && session.user.id) {
+            try {
+              await saveChat({
+                id,
+                messages: [...coreMessages, ...responseMessages],
+                email: session.user.email,
+                systemPrompt,
+                tools: actions.map((action) => ({
+                  name: action.function.name,
+                })),
+                modelName,
+                modelProvider,
+              });
+            } catch (error) {
+              console.error("Failed to save chat", error);
+            }
+          }
+        },
+        experimental_telemetry: {
+          isEnabled: true,
+          functionId: "stream-text",
+        },
+      });
+      result.mergeIntoDataStream(dataStream);
     },
-    onFinish: async ({ responseMessages }) => {
-      if (session.user && session.user.id) {
-        try {
-          await saveChat({
-            id,
-            messages: [...coreMessages, ...responseMessages],
-            userId: session.user.id,
-          });
-        } catch (error) {
-          console.error("Failed to save chat");
-        }
+    onError(error) {
+      console.error(error);
+      if (NoSuchToolError.isInstance(error)) {
+        return "The model tried to call a unknown tool.";
+      } else if (InvalidToolArgumentsError.isInstance(error)) {
+        return "The model called a tool with invalid arguments.";
+      } else if (ToolExecutionError.isInstance(error)) {
+        return "An error occurred during tool execution. " + error.message;
+      } else {
+        return "An unknown error occurred.";
       }
     },
-    experimental_telemetry: {
-      isEnabled: true,
-      functionId: "stream-text",
-    },
   });
-
-  return result.toDataStreamResponse({});
 }
 
 export async function DELETE(request: Request) {

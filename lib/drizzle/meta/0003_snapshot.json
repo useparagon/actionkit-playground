@@ -1,8 +1,8 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "73e047b1-fafe-4faf-b9e5-9878f5087fba",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "333ad3b7-20fb-4483-9b5b-5daa5640103c",
+  "prevId": "104fa96e-e3c8-4c4b-94c0-a95a2ea4c286",
   "tables": {
     "Chat": {
       "name": "Chat",
@@ -31,6 +31,20 @@
         "userId": {
           "name": "userId",
           "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "systemPrompt": {
+          "name": "systemPrompt",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "tools": {
+          "name": "tools",
+          "type": "blob",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -74,6 +88,13 @@
         },
         "password": {
           "name": "password",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "externalId": {
+          "name": "externalId",
           "type": "text",
           "primaryKey": false,
           "notNull": false,

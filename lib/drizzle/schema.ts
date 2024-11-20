@@ -1,9 +1,8 @@
-import { Message } from "ai";
-import { InferSelectModel } from "drizzle-orm";
 import {
   sqliteTable,
   text,
   integer,
+  blob,
   foreignKey,
 } from "drizzle-orm/sqlite-core";
 import { v4 } from "uuid";
@@ -12,22 +11,15 @@ export const user = sqliteTable("User", {
   id: text("id").notNull().primaryKey().$defaultFn(v4),
   email: text("email").notNull(),
   password: text("password"),
-  externalId: text("externalId"),
 });
-
-export type User = InferSelectModel<typeof user>;
 
 export const chat = sqliteTable(
   "Chat",
   {
     id: text("id").notNull().primaryKey().$defaultFn(v4),
     createdAt: integer("createdAt", { mode: "timestamp" }).notNull(),
-    messages: text("messages", { mode: "json" }).$type<Message[]>().notNull(),
+    messages: blob("messages", { mode: "json" }).notNull(),
     userId: text("userId").notNull(),
-    systemPrompt: text("systemPrompt").notNull(),
-    tools: text("tools", { mode: "json" }).notNull(),
-    modelName: text("modelName").notNull(),
-    modelProvider: text("modelProvider").notNull(),
   },
   (table) => {
     return {
@@ -40,5 +32,3 @@ export const chat = sqliteTable(
     };
   }
 );
-
-export type Chat = InferSelectModel<typeof chat>;

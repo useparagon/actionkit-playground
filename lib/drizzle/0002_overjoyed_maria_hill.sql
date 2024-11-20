@@ -1,0 +1,1 @@
+ALTER TABLE `Chat` ADD `systemPrompt` text NOT NULL;

@@ -1,7 +1,16 @@
 import { Chat } from "@/components/custom/chat";
 import { generateUUID } from "@/lib/utils";
+import { auth, ExtendedSession, userWithToken } from "../(auth)/auth";
 
 export default async function Page() {
   const id = generateUUID();
-  return <Chat key={id} id={id} initialMessages={[]} />;
+  const session = await userWithToken();
+  return (
+    <Chat
+      session={session}
+      key={id}
+      id={id}
+      initialMessages={[]}
+    />
+  );
 }

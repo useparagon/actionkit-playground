@@ -4,7 +4,6 @@ import * as VisuallyHidden from "@radix-ui/react-visually-hidden";
 import cx from "classnames";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
-import { User } from "next-auth";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import useSWR from "swr";
@@ -44,7 +43,7 @@ import {
   SheetTitle,
 } from "../ui/sheet";
 
-export const History = ({ user }: { user: User | undefined }) => {
+export const History = ({ user }: { user: object | undefined | null }) => {
   const { id } = useParams();
   const pathname = usePathname();
 
@@ -129,7 +128,7 @@ export const History = ({ user }: { user: User | undefined }) => {
                 className="font-normal text-sm flex flex-row justify-between"
                 asChild
               >
-                <Link href="/">
+                <Link href="/" onClick={() => setIsHistoryVisible(false)}>
                   <div>Start a new chat</div>
                   <PencilEditIcon size={14} />
                 </Link>
@@ -169,19 +168,20 @@ export const History = ({ user }: { user: User | undefined }) => {
                     key={chat.id}
                     className={cx(
                       "flex flex-row items-center gap-6 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded-md pr-2",
-                      { "bg-zinc-200 dark:bg-zinc-700": chat.id === id },
+                      { "bg-zinc-200 dark:bg-zinc-700": chat.id === id }
                     )}
                   >
                     <Button
                       variant="ghost"
                       className={cx(
-                        "hover:bg-zinc-200 dark:hover:bg-zinc-700 justify-between p-0 text-sm font-normal flex flex-row items-center gap-2 pr-2 w-full transition-none",
+                        "hover:bg-zinc-200 dark:hover:bg-zinc-700 justify-between p-0 text-sm font-normal flex flex-row items-center gap-2 pr-2 w-full transition-none"
                       )}
                       asChild
                     >
                       <Link
                         href={`/chat/${chat.id}`}
                         className="text-ellipsis overflow-hidden text-left py-2 pl-2 rounded-lg outline-zinc-900"
+                        onClick={() => setIsHistoryVisible(false)}
                       >
                         {getTitleFromChat(chat)}
                       </Link>

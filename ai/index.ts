@@ -1,8 +1,20 @@
 import { openai } from "@ai-sdk/openai";
-import { experimental_wrapLanguageModel as wrapLanguageModel } from "ai";
+import { anthropic } from "@ai-sdk/anthropic";
+import {
+  LanguageModelV1,
+  experimental_wrapLanguageModel as wrapLanguageModel,
+} from "ai";
 import { customMiddleware } from "./custom-middleware";
 
-export const customModel = wrapLanguageModel({
-  model: openai("gpt-4o"),
-  middleware: customMiddleware,
-});
+export const customModel = ({
+  type = "openai",
+  model = "gpt-4o",
+}: {
+  type?: "openai" | "anthropic";
+  model?: string;
+}) =>
+  wrapLanguageModel({
+    model:
+      type === "openai" ? openai(model) : (anthropic(model) as LanguageModelV1),
+    middleware: customMiddleware,
+  });

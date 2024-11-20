@@ -8,8 +8,8 @@ config({
 export default defineConfig({
   schema: "./db/schema.ts",
   out: "./lib/drizzle",
-  dialect: "postgresql",
+  dialect: "sqlite",
   dbCredentials: {
-    url: process.env.POSTGRES_URL!,
+    url: "db.sqlite"
   },
 });
