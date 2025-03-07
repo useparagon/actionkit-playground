@@ -62,7 +62,7 @@ export async function POST(request: Request) {
   return createDataStreamResponse({
     execute(dataStream: DataStreamWriter) {
       const result = streamText({
-        model: customModel({}),
+        model: customModel({ type: "azure" }),
         system: systemPrompt,
         messages: coreMessages,
         maxSteps: 5,
