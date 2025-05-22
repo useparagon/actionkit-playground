@@ -1,6 +1,7 @@
 import { FunctionTool } from "@/app/(chat)/api/chat/route";
 import ConnectSDK from "@useparagon/connect/ConnectSDK";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { ACTIONKIT_BASE_URL } from "./constants";
 
 export type ParagraphTypes = Record<
   string,
@@ -27,7 +28,7 @@ let paragon: ConnectSDK | undefined;
 export default function useParagon(paragonUserToken: string) {
   useEffect(() => {
     if (typeof window !== "undefined" && typeof paragon === "undefined") {
-      paragon = new ConnectSDK();
+      paragon = new ConnectSDK(process.env.NEXT_PUBLIC_PARAGON_BASE_URL);
     }
   }, []);
 
@@ -44,7 +45,7 @@ export default function useParagon(paragonUserToken: string) {
     const authedUser = paragon.getUser();
     if (authedUser.authenticated) {
       const r = await fetch(
-        `https://actionkit.useparagon.com/projects/${process.env.NEXT_PUBLIC_PARAGON_PROJECT_ID!}/actions`,
+        `${ACTIONKIT_BASE_URL}/projects/${process.env.NEXT_PUBLIC_PARAGON_PROJECT_ID!}/actions`,
         {
           method: "GET",
           headers: {

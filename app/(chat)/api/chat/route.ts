@@ -2,7 +2,6 @@ import { createAISDKTools } from "@agentic/ai-sdk";
 import { FirecrawlClient } from "@agentic/firecrawl";
 import {
   convertToCoreMessages,
-  CoreTool,
   createDataStreamResponse,
   jsonSchema,
   Message,
@@ -14,14 +13,13 @@ import {
   DataStreamWriter,
 } from "ai";
 import type { JSONSchema7 } from "json-schema";
-import { z } from "zod";
 
 import { customModel } from "@/ai";
-import { auth, ExtendedSession, userWithToken } from "@/app/(auth)/auth";
+import { auth, userWithToken } from "@/app/(auth)/auth";
 import { deleteChatById, getChatById, saveChat } from "@/db/queries";
 
-import { ActionInput, ParagraphTypes } from "@/lib/paragon/useParagon";
-import { setTimeout } from "timers/promises";
+import { ParagraphTypes } from "@/lib/paragon/useParagon";
+import { ACTIONKIT_BASE_URL } from "@/lib/paragon/constants";
 
 export type FunctionTool = {
   type: "function";
@@ -83,7 +81,7 @@ export async function POST(request: Request) {
                     });
                     try {
                       const r = await fetch(
-                        `https://actionkit.useparagon.com/projects/${process.env.NEXT_PUBLIC_PARAGON_PROJECT_ID}/actions`,
+                        `${ACTIONKIT_BASE_URL}/projects/${process.env.NEXT_PUBLIC_PARAGON_PROJECT_ID}/actions`,
                         {
                           method: "POST",
                           body: JSON.stringify({
