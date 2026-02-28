@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { getSignInUrl, signOut } from "@workos-inc/authkit-nextjs";
-import { BookOpen, UserRound } from "lucide-react";
+import { BookOpen, LayoutGrid, UserRound } from "lucide-react";
 
 export const Navbar = async () => {
   let { user } = await userWithToken();
@@ -33,6 +33,13 @@ export const Navbar = async () => {
           </div>
         </div>
         <div className="flex items-center">
+          <Link
+            className="mr-2 text-sm font-semibold flex items-center rounded hover:bg-secondary py-1.5 px-2 transition-colors"
+            href="/integrations"
+          >
+            <LayoutGrid className="h-4 mr-1" />
+            Integrations
+          </Link>
           <a
             className="mr-2 text-sm font-semibold flex items-center rounded hover:bg-secondary py-1.5 px-2 transition-colors"
             target="_blank"
