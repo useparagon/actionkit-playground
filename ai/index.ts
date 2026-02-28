@@ -14,6 +14,7 @@ export const customModel = ({
   model?: string;
 }) =>
   wrapLanguageModel({
+    // @ts-expect-error pre-existing version mismatch between @ai-sdk/provider versions
     model:
       type === "openai" ? openai(model) : (anthropic(model) as LanguageModelV1),
     middleware: customMiddleware,
