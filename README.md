@@ -7,4 +7,4 @@ Try ActionKit in the Playground, a sandbox to test chatting with an agent that h
 
 ## Setup
 
-For the latest setup instructions for ActionKit Playground, please visit [our documentation](https://docs.useparagon.com/actionkit/playground).
+For the latest setup instructions for ActionKit Playground, please visit [our documentation](https://docs.useparagon.com/actionkit/actionkit-playground).
